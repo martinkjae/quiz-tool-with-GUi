@@ -1,0 +1,110 @@
+import tkinter as tk
+from tkinter import messagebox
+
+# List of questions and answers
+questions = [
+    {"question": "The current Warchief of the horde is what race?", 
+     "options": ["Undead", "Orc", "Mag'har orc", "Jungle troll"], 
+     "answer": "Undead"},
+    
+    {"question": "What minion and voiceline is the inspiration for the name of this famous streamer?", 
+     "options": ["Doomsayer: I knew it", "SI:7 Agent: Hah, this guy's toast.", "Knife Juggler: Put this apple on your head!", "Lorewalker Cho: Show me what you've learned."], 
+     "answer": "SI:7 Agent: Hah, this guy's toast."},
+    
+    {"question": "What is the most played class in Hearthstone throughout history?", 
+     "options": ["Hunter", "Mage", "Warlock", "Druid"], 
+     "answer": "Mage"},
+    
+    {"question": "We asked the Hearthstone Reddit what cards give the mods PTSD from voiceline alone. What card came up most?", 
+     "options": ["Saronite Chain Gang: How-How long can this go on?", "Pen Flinger: Hey, loser!", "Knife Juggler: Put this apple on your head!", "Convincing Infiltrator: Greetings, fellow humans."], 
+     "answer": "Convincing Infiltrator: Greetings, fellow humans."}
+]
+
+class QuizApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Quiz Application")
+        self.score = 0
+        self.current_question_index = 0
+        
+        # Label for displaying the question
+        self.question_label = tk.Label(self.root, text="", font=("Arial", 16), wraplength=400)
+        self.question_label.pack(pady=20)
+        
+        # Button for options
+        self.buttons = []
+        for i in range(4):
+            btn = tk.Button(self.root, text="", font=("Arial", 12), width=20, command=lambda i=i: self.check_answer(i))
+            self.buttons.append(btn)
+        
+        self.show_question()
+
+    def show_question(self):
+        # Display current question
+        question_data = questions[self.current_question_index]
+        self.question_label.config(text=question_data["question"])
+        
+        # Set button text and dynamically adjust sizes
+        max_width = 0
+        for i, option in enumerate(question_data["options"]):
+            self.buttons[i].config(text=option)
+            # Update max_width to be the longest option length
+            max_width = max(max_width, len(option))
+        
+        # Dynamically adjust the button width to fit the longest option text
+        for btn in self.buttons:
+            btn.config(width=max(20, max_width))  # Use max(20, max_width) to ensure buttons are not small
+
+        # Repack buttons to show them again after being hidden
+        for btn in self.buttons:
+            btn.pack(pady=5)
+
+    def check_answer(self, selected_index):
+        question_data = questions[self.current_question_index]
+        correct_answer = question_data["answer"]
+        selected_answer = question_data["options"][selected_index]
+        
+        if selected_answer == correct_answer:
+            self.score += 1
+            self.display_correct_screen()
+        else:
+            self.display_incorrect_screen()
+        
+    def display_correct_screen(self):
+        # Show "Correct!" screen
+        self.question_label.config(text="Correct!", fg="green", font=("Arial", 24))
+        # Hide the buttons temporarily again
+        for btn in self.buttons:
+            btn.pack_forget()
+
+        # After a short delay move to the next question
+        self.root.after(1000, self.next_question)
+
+    def display_incorrect_screen(self):
+        # Show "Incorrect" screen
+        self.question_label.config(text="Incorrect", fg="dark blue", font=("Arial", 24))
+        # Hide buttons temporarily again
+        for btn in self.buttons:
+            btn.pack_forget()
+
+        # After a short delay move to next question
+        self.root.after(1000, self.next_question)
+
+    def next_question(self):
+        # next question
+        self.current_question_index += 1
+        
+        if self.current_question_index < len(questions):
+            self.show_question()
+        else:
+            self.show_score()
+
+    def show_score(self):
+        # After all questions are answered show the score
+        messagebox.showinfo("Quiz Over", f"Your final score is: {self.score}/{len(questions)}")
+        self.root.quit()
+
+# Create main window
+root = tk.Tk()
+quiz_app = QuizApp(root)
+root.mainloop()
